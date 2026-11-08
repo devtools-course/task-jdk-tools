@@ -6,10 +6,9 @@ LABEL authors="lBAH, Kalinin Iwan <koefic.cien@gmail.com>"
 RUN apt update && apt install --no-install-recommends -y \
         git \
         shellcheck \
+        procps \
     && apt clean \
     && useradd -G sudo -m -s "/bin/bash" fikus
-
-RUN apt install -y procps
 
 WORKDIR /home/fikus
 
