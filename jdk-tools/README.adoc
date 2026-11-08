@@ -1,0 +1,198 @@
+= JDK tools
+
+> Fenrir ID: `jdk-tools` +
+> Branch: `jdk-tools` +
+> Points: `50`
+
+== Task submission
+
+Put all the systemd unit files in the `jdk-tools` directory:
+
+[,text,subs="+macros"]
+----
+icon:folder[] ...
+├─ icon:folder[] jdk-tools
+│  ├─ icon:folder[] docs
+│  │  ├─ ...
+│  │  └─ icon:file-text[] gendocs.sh
+│  ├─ icon:folder[] jit
+│  │  ├─ ...
+│  │  ├─ icon:file-text[] gen_aot.sh
+│  │  └─ icon:file-text[] run.sh
+│  ├─ icon:folder[] multi
+│  │  ├─ ...
+│  │  ├─ icon:file-text[] build.sh
+│  │  ├─ icon:file-text[] entrypoint.sh
+│  │  ├─ icon:file-text[] jar.sh
+│  │  └─ icon:file-text[] run.sh
+│  └─ icon:folder[] simple
+│  │  ├─ ...
+│  │  ├─ icon:file-text[] build.sh
+│  │  └─ icon:file-text[] run.sh
+└─ icon:folder[] .git
+----
+
+IMPORTANT: All sources use java 25. The resulting bytecode must target java 25 too.
+
+CAUTION: You must use JDK tools and their options whenever is possible!
+
+== Simple app (5 points)
+
+Subdirectory: `simple`
+
+Create two scripts: `build.sh` and `run.sh`. The first one must compile the code in the subdirectory. The second one must run `Main.java`, forwarding the provided command-line arguments.
+
+[,console]
+----
+$ ./build.sh
+$ ./run.sh qwe
+Exception in thread "main" java.lang.NumberFormatException: For input string: "qwe"
+        at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:67)
+        at java.base/java.lang.Integer.parseInt(Integer.java:565)
+        at java.base/java.lang.Integer.parseInt(Integer.java:662)
+        at java.base/java.util.stream.ReferencePipeline$4$1.accept(ReferencePipeline.java:231)
+        at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+        at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+        at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+        at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:635)
+        at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:291)
+        at java.base/java.util.stream.IntPipeline.toArray(IntPipeline.java:564)
+        at Main.main(Main.java:4)
+----
+
+== Javadoc (5 points)
+
+Subdirectory: `docs`
+
+Create a script `gendocs.sh` which generates Javadoc for the code inside the `src` directory.
+
+CAUTION: The sources themselves contain no Javadoc. Instead, they have regular comments: transform them into proper Javadoc.
+
+== Multi-root project (10 points)
+
+Subdirectory: `multi`
+
+Create two scripts: `build.sh` and `run.sh`.
+
+build.sh {fr|es|it} <OUTPUT_DIR>::
+Compiles the specified subroot (`france`, `spain` or `italy`) and puts the result into the `OUTPUT_DIR`.
+
+TIP: If you want to use `**` glob pattern, add `shopt -s globstar` to your script.
+
+run.sh <BUILD_DIRS>...::
+Runs `Bar.java` from the `bar` directory. The `OUTPUT_DIR`{empty}s from the `build.sh` are passed as CL-options. _Do not compile `Bar.java`: run it directly!_
+
+== Jars (10 points)
+
+Subdirectory: `multi`
+
+Create a `jar.sh` script which produces three jars: `fr.jar`, `es.jar`, `it.jar`. Each jar must contain its package only and be executable (use `Runner` class). The jars must be put to the directory provided as `$1`.
+
+TIP: Use `build.sh` from the previous part.
+
+[,console]
+----
+$ jar tf es.jar
+META-INF/
+META-INF/MANIFEST.MF
+es/
+es/olives/
+es/olives/Manzanilla.class
+es/olives/Olives.class
+es/producto/
+es/producto/Producto.class
+es/producto/Productor.class
+es/run/
+es/run/Runner.class
+----
+
+== More jars (10 points)
+
+Subdirectory: `multi`
+
+Create an `entrypoint.sh` script which produces `main.jar` file. This jar must be executable and contain `Bar.class` only. The jar file must be configured so that it can be executed with `java -jar` when `fr.jar`, `es.jar` and `it.jar` are placed next to it.
+
+TIP: During the seminar we had a problem with running `java -cp .. -jar ..`. The command failed due to the fact that `java` ignores `-cp` option when `-jar` is provided. To fix this, you must introduce the required classpath within the jar's manifest.
+
+== AOT cache (10 points)
+
+Java 24 and 25 introduced an interesting feature: AOT cache.
+It helps to reduce the startup time and still be able to use JIT compiler. One of the most time-consuming actions during the startup is dynamic class loading. Spring framework face this problem especially: it loads dozens of classes with reflection. This feature may help with this problem.
+
+To understand how to use the feature read https://openjdk.org/jeps/514[JEP 514].
+
+You have to create two files: `gen_aot.sh` and `run.sh`.
+
+gen_aot.sh::
+Generates cache. To start the app, you have to generate the class which are to be loaded later. Run `Gen.java` to create them. After the classes are generated, run the `main` method from the `Enter` class and collect the AOT cache.
+
+run.sh::
+Runs the `main` method from the `Enter` class, using the collected AOT cache before.
+
+
+_You might face a "strange" error. Use `-Xlog:aot` option to inspect the problem. Check the example below  --  it might help._
+
+.Possible problem
+[%collapsible]
+====
+[,text]
+----
+[0.005s][info][aot] trying to map app.aot
+[0.005s][info][aot] Opened AOT cache app.aot.
+[0.005s][info][aot] The AOT cache was created with UseCompressedOops = 1, UseCompressedClassPointers = 1, UseCompactObjectHeaders = 0
+[0.005s][info][aot] optimized module handling: disabled because archive was created without optimized module handling
+[0.005s][info][aot] Core region alignment: 4096
+[0.005s][info][aot] ArchiveRelocationMode: 1
+[0.005s][info][aot] ArchiveRelocationMode == 1: always map archive(s) at an alternative address
+[0.005s][info][aot] Try to map archive(s) at an alternative address
+[0.005s][info][aot] Reserved archive_space_rs [0x000000006e000000 - 0x0000000070000000] (33554432) bytes (includes protection zone)
+[0.005s][info][aot] Reserved class_space_rs   [0x0000000070000000 - 0x00000000b0000000] (1073741824) bytes
+[0.005s][info][aot] Mapped static  region #0 at base 0x000000006e001000 top 0x000000006e7b9000 (ReadWrite)
+[0.005s][info][aot] Mapped static  region #1 at base 0x000000006e7b9000 top 0x000000006f2a7000 (ReadOnly)
+[0.005s][info][aot] Mapped static  region #2 at base 0x00007ffb92836000 top 0x00007ffb9287f000 (Bitmap)
+[0.008s][info][aot] archived module property jdk.module.main: (null)
+[0.008s][info][aot] archived module property jdk.module.addexports: (null)
+[0.008s][info][aot] archived module property jdk.module.addmods: (null)
+[0.008s][error][aot] An error has occurred while processing the AOT cache. Run with -Xlog:aot for details.
+[0.008s][error][aot] Mismatched values for property jdk.module.addmods: jdk.internal.vm.ci specified during runtime but not during dump time
+[0.008s][error][aot] Disabling optimized module handling
+[0.008s][info ][aot] archived module property jdk.module.enable.native.access: (null)
+[0.008s][info ][aot] archived module property jdk.module.addopens: (null)
+[0.008s][info ][aot] archived module property jdk.module.addreads: (null)
+[0.008s][info ][aot] optimized module handling: disabled
+[0.008s][info ][aot] full module graph: disabled
+[0.008s][info ][aot] CDS archive was created with max heap size = 15936M, and the following configuration:
+[0.008s][info ][aot]     narrow_klass_base at mapping start address, narrow_klass_pointer_bits = 32, narrow_klass_shift = 0
+[0.008s][info ][aot]     narrow_oop_mode = 1, narrow_oop_base = 0x0000000000000000, narrow_oop_shift = 3
+[0.008s][info ][aot] The current max heap size = 15936M, G1HeapRegion::GrainBytes = 8388608
+[0.008s][info ][aot]     narrow_klass_base = 0x000000006e000000, arrow_klass_pointer_bits = 32, narrow_klass_shift = 0
+[0.008s][info ][aot]     narrow_oop_mode = 1, narrow_oop_base = 0x0000000000000000, narrow_oop_shift = 3
+[0.008s][info ][aot]     heap range = [0x000000041c000000 - 0x0000000800000000]
+[0.008s][info ][aot] Preferred address to map heap data (to avoid relocation) is 0x00000007ff800000
+[0.008s][info ][aot] Heap data mapped at 0x00000007ff800000, size =  1376248 bytes
+[0.008s][info ][aot] CDS heap data relocation delta = 0 bytes
+[0.008s][info ][aot] initial optimized module handling: disabled
+[0.008s][info ][aot] initial full module graph: disabled
+[0.008s][info ][aot] Unmapping region #2 at base 0x00007ffb92836000 (Bitmap)
+[0.008s][info ][aot] Using AOT-linked classes: false (static archive: no aot-linked classes)
+----
+
+Solution: add `--add-modules=jdk.internal.vm.ci` option when running `java`.
+====
+
+== Questions
+* Why is `globstar` required when using `**`?
+* How to create Javadoc for a package?
+* How to run a `.java` file without compiling it beforehand?
+* Why is dynamic loading so time-consuming?
+
+== Copyright
+
+pass:[<i class="fab fa-creative-commons"></i>]
+pass:[<i class="fab fa-creative-commons-by"></i>]
+pass:[<i class="fab fa-creative-commons-nc"></i>]
+pass:[<i class="fab fa-creative-commons-sa"></i>]
+
+The project is licensed under the terms of the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+
+(C) 2026-present *Iwan Kalinin* <mailto:koefic.cien@gmail.com[koefic.cien@gmail.com]>
