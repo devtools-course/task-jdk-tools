@@ -17,4 +17,6 @@ COPY --from=fenrir /usr/local/bin/loki /usr/local/bin/
 COPY --from=fenrir --chown=fikus:fikus /etc/fenrir /etc/fenrir
 COPY --from=fenrir --chown=fikus:fikus /home/fikus/.fenrir /home/fikus/.fenrir
 
+USER fikus
+
 ENTRYPOINT [ "top", "-b" ]
