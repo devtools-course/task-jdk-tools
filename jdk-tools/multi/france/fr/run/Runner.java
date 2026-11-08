@@ -13,7 +13,7 @@ public class Runner {
     static Class getClass(String className, String packageName) {
         try {
             return Class.forName(
-                    packageName + "." + className.substring(0, className.lastIndexOf('.'))
+                    packageName + "." + className.replace("/", ".").substring(0, className.lastIndexOf('.'))
             );
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -43,7 +43,7 @@ public class Runner {
     }
 
     static void main() throws IOException {
-        var pack = "fr.cognac";
+        var pack = "fr.local";
         Objects.requireNonNull(getClassNames(pack))
                 .filter(line -> line.endsWith(".class"))
                 .map(line -> getClass(line, pack))

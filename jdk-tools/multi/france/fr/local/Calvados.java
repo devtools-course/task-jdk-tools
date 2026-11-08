@@ -1,9 +1,9 @@
-package fr;
+package fr.local;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Grapes {
-    public static int grow() {
+public class Calvados {
+    public static int hi() {
         return ThreadLocalRandom.current().nextInt();
     }
 }

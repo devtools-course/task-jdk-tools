@@ -45,7 +45,7 @@ public class Runner {
     }
 
     static void main() throws IOException {
-        var pack = "es.olives";
+        var pack = "es.local";
         Objects.requireNonNull(getClassNames(pack))
                 .filter(line -> line.endsWith(".class"))
                 .map(line -> getClass(line, pack))
