@@ -7,6 +7,7 @@ RUN apt update && apt install --no-install-recommends -y \
         git \
         shellcheck \
         procps \
+        curl \
     && apt clean \
     && useradd -G sudo -m -s "/bin/bash" fikus
 
