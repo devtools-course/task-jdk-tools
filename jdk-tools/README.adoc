@@ -26,9 +26,9 @@ icon:folder[] ...
 │  │  ├─ icon:file-text[] jar.sh
 │  │  └─ icon:file-text[] run.sh
 │  └─ icon:folder[] simple
-│  │  ├─ ...
-│  │  ├─ icon:file-text[] build.sh
-│  │  └─ icon:file-text[] run.sh
+│     ├─ ...
+│     ├─ icon:file-text[] build.sh
+│     └─ icon:file-text[] run.sh
 └─ icon:folder[] .git
 ----
 
