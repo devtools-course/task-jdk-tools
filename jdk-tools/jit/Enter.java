@@ -23,7 +23,7 @@ static int bootstrap(int plugins) throws Exception {
 }
 
 void main(String[] args) throws Exception {
-    int plugins = args.length > 2 ? Integer.parseInt(args[2]) : 1500;
+    int plugins = args.length > 2 ? Integer.parseInt(args[0]) : 1500;
 
     System.err.println(uptime());
     int x = bootstrap(plugins);
