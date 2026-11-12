@@ -124,7 +124,7 @@ To understand how to use the feature read https://openjdk.org/jeps/514[JEP 514].
 You have to create two files: `gen_aot.sh` and `run.sh`.
 
 gen_aot.sh::
-Generates cache. To start the app, you have to generate the class which are to be loaded later. Run `Gen.java` to create them. You must create 3k classes (`argv = [3000]`) After the classes are generated, run the `main` method from the `Enter` class and collect the AOT cache.
+Generates cache. To start the app, you have to generate the class which are to be loaded later. Run `Gen.java` to create them. You must create 1.5k classes (`argv = [1500]`) After the classes are generated, run the `main` method from the `Enter` class and collect the AOT cache.
 
 run.sh::
 Runs the `main` method from the `Enter` class, using the collected AOT cache before.
